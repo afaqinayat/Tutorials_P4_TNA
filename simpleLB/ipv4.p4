@@ -85,6 +85,7 @@ control SwitchIngressDeparser(
 }
 
 /*TODO: register definition */
+Register<bit<32>, _>(1) lb_counter;
 
 control SwitchIngress(
         inout header_t hdr,
