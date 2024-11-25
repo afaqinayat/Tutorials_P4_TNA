@@ -22,6 +22,11 @@
 
 /*TODO: define the necesssary metadata*/
 
+struct metadata_t { bit<32>
+	output_lb;
+	}
+	
+	
 // ---------------------------------------------------------------------------
 // Ingress parser
 // ---------------------------------------------------------------------------
@@ -115,11 +120,7 @@ control SwitchIngress(
 	1; } rv = value; }
 	};
 	
-	struct metadata_t { bit<32>
-	output_lb;
-	}
 	
-	ig_md.output_lb = check_counter.execute(0);
 	
     /* TODO: Define the action LB */
     
@@ -146,6 +147,9 @@ control SwitchIngress(
         }
 
 	/* TODO: Instantiate the register action */  
+	
+	ig_md.output_lb = check_counter.execute(0);
+
         /* TODO: Apply the table */
         def_lb.apply();
         
