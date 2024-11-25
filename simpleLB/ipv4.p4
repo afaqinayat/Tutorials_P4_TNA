@@ -108,20 +108,36 @@ control SwitchIngress(
 
     /*TODO: create register action*/
 
-    table ipv4_lpm {
-        key = {
-            hdr.ipv4.dst_addr: exact;
-        }
-        actions = { 
-            ipv4_forward;
-            drop_;
-        }
-        size = 1024;
-    }
-
+    RegisterAction<bit<32>, _, bit<32>>(lb_counter) check_counter = {
+	void apply(inout bit<32> value, out bit<32> rv) {
+	if(value == 1){value = 0; }
+	else{ value =
+	1; } rv = value; }
+	};
+	
+	struct metadata_t { bit<32>
+	output_lb;
+	}
+	
+	ig_md.output_lb = check_counter.execute(0);
+	
     /* TODO: Define the action LB */
+    
+    action action_lb(PortId_t port, mac_addr_t dst_mac)
+	{ ig_intr_tm_md.ucast_egress_port = port;
+	hdr.ethernet.dst_addr = dst_mac;
+	}
 
     /* TODO: Define the table to match the LB parameters */
+    
+    table def_lb { key
+	=
+	{ hdr.ipv4.dst_addr: exact; ig_md.output_lb:
+	exact;
+	} actions =
+	{ action_lb;
+	} size = 2;
+	}
 
     apply {
 
@@ -131,6 +147,7 @@ control SwitchIngress(
 
 	/* TODO: Instantiate the register action */  
         /* TODO: Apply the table */
+        def_lb.apply();
         
         ig_intr_tm_md.bypass_egress = 1w1;
     }
